@@ -5,48 +5,77 @@ char Gears[] = {'P', 'R', 'N', 'D', '2', '1'};
 int selectedGear = 0;
 bool shifting = false;
 
-typedef struct Timer {
+struct Timer {
   unsigned long start;
   unsigned long timeout;
 };
 
-typedef struct PaddleState {
+struct PaddleState {
   bool right;
   bool left;
 };
 
-//Display task running every 3000 milliseconds
-Timer timerDisplay = { 0, 3000 };
+PaddleState currentPaddles;
+PaddleState lastPaddles;
+Timer timerDisplay;
 
 void setup (void) {
   TimerStart ( & timerDisplay );
+  timerDisplay = { 0, 3000 };
+
+  Serial.begin(9600);
 }
 
 void loop (void) {
   //  Read shifters
-  PaddleState paddles = { digitalRead(leftPaddlePin), digitalRead(rightPaddlePin) };
+  currentPaddles = { digitalRead(leftPaddlePin), digitalRead(rightPaddlePin) };
 
-  if ( !shifting ) {
-    shift( & paddles );
-  }
   if ( TimerExpired ( & timerDisplay ) ) {
     taskDisplay ( );
     TimerStart ( & timerDisplay );
   }
+
+  if (comparePaddles(&currentPaddles, &lastPaddles)) {
+    if ( !shifting ) {
+      shift( & currentPaddles );
+    }
+    delay(50); // Delay a little bit to avoid bouncing
+  }
+  lastPaddles = currentPaddles;
 }
 
-void shift ( struct PaddleState * paddles ) {
-  if (paddels->right && paddels->left) {
-    //  Both paddles pressed
-    //  Maybe special action
-  }
-  if (!paddels->right && paddels->left){}
-  if (paddels->right && !paddels->left){}
-  }
+//  Display Code
 
 void taskDisplay ( void ) {
   //  Display Gears[selectedGear]
 }
+
+//  Shifter Code
+
+bool comparePaddles(struct PaddleState * p0, struct PaddleState * p1) {
+  bool o = true;
+  if (p0->right != p1->right) {
+    o = false;
+  }
+  if (p0->left != p1->left) {
+    o = false;
+  }
+}
+
+void shift ( struct PaddleState * paddles ) {
+  if (paddles->right && paddles->left) {
+    //  Both paddles pressed
+    //  Maybe special action
+  }
+  if (!paddles->right && paddles->left) {
+    Serial.println("Shifted up");
+  }
+  if (paddles->right && !paddles->left) {
+    Serial.println("Shifted down");
+  }
+}
+
+//  Timer Code
 
 char TimerExpired ( struct Timer * timer ) {
   if ( millis () > timer->start + timer->timeout )

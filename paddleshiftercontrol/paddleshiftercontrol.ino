@@ -1,8 +1,8 @@
 #define leftPaddlePin 11
 #define rightPaddlePin 12
 
-char Gears[] = {'P', 'R', 'N', 'D', '2', '1'};
-int selectedGear = 0;
+char Gears[] = {'P', 'R', 'N', 'L', 'H'};
+int currentGear;
 bool shifting = false;
 
 struct Timer {
@@ -22,6 +22,8 @@ Timer timerDisplay;
 void setup() {
   TimerStart ( & timerDisplay );
   timerDisplay = { 0, 3000 };
+
+  currentGear = 0;
 
   pinMode(leftPaddlePin, INPUT);
   pinMode(rightPaddlePin, INPUT);
@@ -65,15 +67,66 @@ bool comparePaddles(struct PaddleState * p0, struct PaddleState * p1) {
   }
 }
 
+/*
+   Shifting cycle N>L>H
+   Shifting down H>L>N>R
+   Shifting up R>L
+   Double Paddle cycle(P > N > P)
+*/
 void shift(struct PaddleState * paddles) {
-  if (paddles->right && paddles->left) {
+  if (paddles->left && paddles->right) {
+    switch (currentGear) {
+      case 0:
+        //  code to use shifter
+        //  wait for callback
+        //  when its in gear
+        currentGear = 1;
+        break;
+      case 1:
+        //  code to use shifter
+        //  wait for callback
+        //  when its in gear
+        currentGear = 0;
+        break;
+      default:
+        /* MAYBE:
+           add possibility to switch from any gear to Neutral with this combination
+           if (speed < 5.0){ currentGear = 'N' }
+        */
+        break;
+    }
   }
-  if (!paddles->right && paddles->left) {
-    //  if (allowed to switch)  //  based on speed sensor
-    Serial.println("Shifted up");
+  if (!paddles->left && paddles->right) {
+    switch (currentGear) {
+      case 0:
+        //  Display error?: GEAR IS LOCKED
+        break;
+      case 4:
+        //  Display error?: THERE IS NO HIGHER GEAR
+        break;
+      default:
+        //  code to use shifter
+        //  wait for callback
+        //  when its in gear
+        currentGear += 1;
+        break;
+    }
   }
-  if (paddles->right && !paddles->left) {
-    Serial.println("Shifted down");
+  if (paddles->left && !paddles->right) {
+    switch (currentGear) {
+      case 0:
+        //  Display error?: GEAR IS LOCKED
+        break;
+      case 1:
+        //  Display error?: THERE IS NO LOWER GEAR
+        break;
+      default:
+        //  code to use shifter
+        //  wait for callback
+        //  when its in gear
+        currentGear -= 1;
+        break;
+    }
   }
 }
 

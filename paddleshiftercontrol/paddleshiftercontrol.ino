@@ -1,6 +1,12 @@
 #define leftPaddlePin 11
 #define rightPaddlePin 12
 
+#define P 0
+#define R 1
+#define N 2
+#define L 3
+#define H 4
+
 char Gears[] = {'P', 'R', 'N', 'L', 'H'};
 int currentGear;
 bool shifting = false;
@@ -76,17 +82,17 @@ bool comparePaddles(struct PaddleState * p0, struct PaddleState * p1) {
 void shift(struct PaddleState * paddles) {
   if (paddles->left && paddles->right) {
     switch (currentGear) {
-      case 0:
+      case P:
         //  code to use shifter
         //  wait for callback
         //  when its in gear
-        currentGear = 1;
+        currentGear = N;
         break;
-      case 1:
+      case N:
         //  code to use shifter
         //  wait for callback
         //  when its in gear
-        currentGear = 0;
+        currentGear = P;
         break;
       default:
         /* MAYBE:
@@ -98,10 +104,10 @@ void shift(struct PaddleState * paddles) {
   }
   if (!paddles->left && paddles->right) {
     switch (currentGear) {
-      case 0:
+      case P:
         //  Display error?: GEAR IS LOCKED
         break;
-      case 4:
+      case H:
         //  Display error?: THERE IS NO HIGHER GEAR
         break;
       default:
@@ -114,10 +120,10 @@ void shift(struct PaddleState * paddles) {
   }
   if (paddles->left && !paddles->right) {
     switch (currentGear) {
-      case 0:
+      case P:
         //  Display error?: GEAR IS LOCKED
         break;
-      case 1:
+      case R:
         //  Display error?: THERE IS NO LOWER GEAR
         break;
       default:
